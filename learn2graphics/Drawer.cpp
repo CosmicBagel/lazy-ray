@@ -154,8 +154,11 @@ void Drawer::Close()
 
 void Drawer::CheckForSdlError()
 {
+	//sdl pretty much exclusively uses c style strings so
+	//it's a bit trickier to use
 	auto e = SDL_GetError();
-	if (sizeof(e) != 0 )
+	//strlen is the way to check the length of a c style string
+	if (strlen(e) != 0 )
 	{
 		LogError(fmt::format("SDL_Error: {}", e));
 		SDL_ClearError();
@@ -171,7 +174,8 @@ void Drawer::LogInfo(std::string message)
 }
 
 //Like info log, but will show up with ERROR in front of it
-//Only use for critical errors
+//Only use for critical errors, often I'll leave a breakpoint on this
+//So I can take a look at the call stack and what not
 //message: standard c++ string
 void Drawer::LogError(std::string message)
 {
