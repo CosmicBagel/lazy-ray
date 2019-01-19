@@ -91,6 +91,9 @@ void Drawer::Present()
 //by closing down
 void Drawer::WaitForUser()
 {
+	if (closed)
+		return;
+
 	//clear event queue before initiating wait
 	while (SDL_PollEvent(&event_) != 0) {}
 
@@ -130,6 +133,9 @@ void Drawer::WaitForUser()
 //Wait for user to hit escape or close the window, then close
 void Drawer::WaitToClose()
 {
+	if (closed)
+		return;
+
 	bool quit = false;
 
 	while (!quit)

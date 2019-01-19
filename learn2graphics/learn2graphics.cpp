@@ -129,7 +129,7 @@ int main(int argc, char ** argv)
 		//stay response to quit events
 		d.CheckForClose();
 		if (d.IsClosed())
-			return 0;
+			break;
 
 		//looking into a faster way to do this,
 		//generally want to play around with SIMD as much as I can in this proj
