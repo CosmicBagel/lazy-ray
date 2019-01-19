@@ -3,23 +3,47 @@
 
 Drawer::Drawer(int width, int height)
 { 
+	width_ = width;
+	height_ = height;
+
+	pixels_ = new Uint32[width_ * height_];
+	pixelPitch_ = width_ * sizeof(Uint32);
+
     SDL_Init(SDL_INIT_VIDEO);
 
-    window = SDL_CreateWindow("SDL2 Pixel Drawing",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
+    window_ = SDL_CreateWindow("SDL2 Pixel Drawing",
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_, height_, 0);
 
-	renderer = SDL_CreateRenderer(window, -1, 0);
-	buffer = SDL_CreateTexture(renderer,
-		SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, width, height);
-	
+	renderer_ = SDL_CreateRenderer(window_, -1, 0);
+	buffer_ = SDL_CreateTexture(renderer_,
+		SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, width_, height_);
+
+	//set inital pixel color to black
+	memset(pixels_, 0, width_ * height_ * sizeof(Uint32));
 }
 
-//Implement faster pixel drawing
-//http://gigi.nullneuron.net/gigilabs/sdl2-pixel-drawing/
 void Drawer::PlacePixel(Color color, Point point)
 {
-	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-	SDL_RenderDrawPoint(renderer, point.x, point.y);
+	//bounds check
+	if (point.x >= width_ || point.y >= height_)
+	{
+		LogError(fmt::format(
+			"Attempted to place pixel out of bounds: {0}, {1}", point.x, point.y));
+		return;
+	}
+	//texure format is ARBG 8888
+	//might have to work on making this faster
+	Uint32 pixel = color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
+	pixels_[point.y * width_ + point.x] = pixel;
+}
+
+// Place four pixels at a time, since it seems like processors
+// like to do things in groups of fours
+// colors: Array of exactly 4 colors (stack mem, not heap)
+// points: Array of exactly 4 points (stack mem, not heap)
+void Drawer::PlacePixelQuad(Color colors[], Point points[])
+{
+	//do a memset for the four pixels in the pixels_ array
 }
 
 void Drawer::PlacePixels(Color color, Point* points, int count)
@@ -27,19 +51,23 @@ void Drawer::PlacePixels(Color color, Point* points, int count)
 	// SDL_RenderDrawPoints(renderer, points, count);
 	//SDL_Point p[] = {{4,5}, {54,3}};
 
-	SDL_RenderDrawPoints(renderer, points, count);
+	SDL_RenderDrawPoints(renderer_, points, count);
 	//LogError(fmt::format("SDL Error: {}", SDL_GetError()));
 }
 
 void Drawer::PlacePixels(Color color, std::vector<Point> points)
 {
 	int size = points.size();
-	SDL_RenderDrawPoints(renderer, points.data(), size);
+	SDL_RenderDrawPoints(renderer_, points.data(), size);
 }
 
 void Drawer::Present()
 {
-	SDL_RenderPresent(renderer);
+	SDL_UpdateTexture(buffer_, NULL, pixels_, pixelPitch_);
+
+	SDL_RenderClear(renderer_);
+	SDL_RenderCopy(renderer_, buffer_, NULL, NULL);
+	SDL_RenderPresent(renderer_);
 }
 
 void Drawer::WaitForUser()
@@ -49,12 +77,12 @@ void Drawer::WaitForUser()
 
 	while (!quit && !user_input)
     {
-        SDL_WaitEvent(&event);
+        SDL_WaitEvent(&event_);
 
-		SDL_Keycode key = event.key.keysym.sym;
-		Uint8 btn = event.button.button;
+		SDL_Keycode key = event_.key.keysym.sym;
+		Uint8 btn = event_.button.button;
  
-        switch (event.type)
+        switch (event_.type)
         {
             case SDL_QUIT:
                 quit = true;
@@ -83,11 +111,11 @@ void Drawer::WaitToClose()
 
 	while (!quit)
     {
-        SDL_WaitEvent(&event);
+        SDL_WaitEvent(&event_);
 
-		SDL_Keycode key = event.key.keysym.sym;
+		SDL_Keycode key = event_.key.keysym.sym;
  
-        switch (event.type)
+        switch (event_.type)
         {
             case SDL_QUIT:
                 quit = true;
@@ -104,8 +132,12 @@ void Drawer::WaitToClose()
 
 void Drawer::Close()
 {
-	SDL_DestroyWindow(window);
+	SDL_DestroyTexture(buffer_);
+	SDL_DestroyRenderer(renderer_);
+	SDL_DestroyWindow(window_);
     SDL_Quit();
+
+	delete[] pixels_;
 }
 
 void Drawer::LogInfo(std::string message)

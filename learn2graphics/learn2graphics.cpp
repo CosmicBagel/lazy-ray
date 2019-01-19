@@ -35,37 +35,34 @@ int main(int argc, char ** argv)
 	
 	int point_index = 0;
 	for (int i = 0; i < 1'000'000; i++) {
-		if (x < width) 
+		if (x+1 < width) 
 			x++;
 		else
 		{
 			x = 0;
-			if (y < height) 
+			if (y+1 < height) 
 				y++; 
 			else {
 				y = 0;
-				d.PlacePixels(c, points, point_count);
-
 				d.Present();
 				frameCount++;
-				// d.WaitForUser();
 			}
 		}
 
-		c.r =  rand() % 256;
+		c.r = rand() % 256;
 		c.g = rand() % 256;
 		c.b = rand() % 256;
-		// c.R = 255;
-		// c.G = 0;
-		// c.B = 0;
+		// c.r = 0;
+		// c.g = 0;
+		// c.b = 255;
 		c.a = 255;
 
-		//d.PlacePixel(c, {x, y});
-		points[point_index] = {x, y};
-		if (point_index + 1 < point_count)
-			point_index++;
-		else
-			point_index = 0;
+		d.PlacePixel(c, {x, y});
+		// points[point_index] = {x, y};
+		// if (point_index + 1 < point_count)
+		// 	point_index++;
+		// else
+		// 	point_index = 0;
 	}
 	d.Present();
 	d.LogInfo(format("{} frames made", frameCount));

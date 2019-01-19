@@ -23,15 +23,20 @@ using Color = SDL_Color;
 class Drawer
 {
 private:
-	SDL_Renderer * renderer;
-	SDL_Event event;
-	SDL_Window * window;
-	SDL_Texture * buffer;
-	int bufferPitch;
+	SDL_Renderer * renderer_;
+	SDL_Event event_;
+	SDL_Window * window_;
+	SDL_Texture * buffer_;
+	//rgba:8+8+8+8=32
+	Uint32 * pixels_;
+	int pixelPitch_;
+	int width_;
+	int height_;
 public:
 	Drawer(int width, int height);
 	void PlacePixel(Color color, Point point);
 	void PlacePixels(Color color, std::vector<Point> points);
+	void PlacePixelQuad(Color colors[], Point points[]);
 	void PlacePixels(Color color, Point* points, int count);
 	void Present();
 	void WaitToClose();
