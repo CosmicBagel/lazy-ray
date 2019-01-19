@@ -28,6 +28,9 @@ void Drawer::WaitForUser()
 	while (!quit)
     {
         SDL_WaitEvent(&event);
+
+		SDL_Keycode key;
+		Uint8 btn;
  
         switch (event.type)
         {
@@ -36,9 +39,8 @@ void Drawer::WaitForUser()
                 break;
 			case SDL_KEYDOWN:
 			{
-				SDL_Keycode key = event.key.keysym.sym;
-				if (key == SDLK_ESCAPE || 
-					key == SDLK_KP_ENTER)
+				key = event.key.keysym.sym;
+				if (key == SDLK_ESCAPE)
 				{
 					quit = true;
 				}
@@ -46,13 +48,11 @@ void Drawer::WaitForUser()
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 			{
-				Uint8 btn = event.button.button;
-				if (btn == SDL_BUTTON_LEFT ||
-					btn == SDL_BUTTON_MIDDLE ||
-					btn == SDL_BUTTON_RIGHT)
-				{
-					quit = true;
-				}
+				btn = event.button.button;
+				// if (btn == SDL_BUTTON_LEFT)
+				// {
+				// 	quit = true;
+				// }
 			}
 				break;
         }

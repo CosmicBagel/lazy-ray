@@ -10,7 +10,6 @@ int main(int argc, char ** argv)
 	d.PlacePixel(c, p);
 	d.Present();
 
-
 	d.WaitForUser();
  
     return 0;
