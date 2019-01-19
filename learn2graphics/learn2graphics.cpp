@@ -11,29 +11,27 @@ using fmt::format;
 
 int main(int argc, char ** argv)
 {
-	printf("dfsdafasdf");
-
-	printf("dfsdafasdf");
+	//Seed the random number generator
 	srand (time(NULL));
 
+	//the dimensions we'll be using for the canvas
 	const int width = 640;
 	const int height = 480;
 
+	//create window, initialize all the drawing stuff
     Drawer d(width, height);
 
+	//vars to be used in the main drawing loop
 	int x = 0;
 	int y = 0;
-	Point p = {5, 5};
-	Color c = {255, 0, 0, 255};
+	Color color = {255, 0, 0, 255};
 	int frameCount = 0;
 
+
+	// waiting before starting drawing so that I can get a better feel of how long
+	// it's taking to draw the frames
 	d.WaitForUser();
 
-	////std::vector<Point> points;
-	const int point_count = width * height;
-	Point * points = new Point[point_count];
-	
-	int point_index = 0;
 	for (int i = 0; i < 1'000'000; i++) {
 		if (x+1 < width) 
 			x++;
@@ -44,27 +42,27 @@ int main(int argc, char ** argv)
 				y++; 
 			else {
 				y = 0;
+				//reset the pixel we're writing to
+				//show frame, increment frame count
+
 				d.Present();
 				frameCount++;
 			}
 		}
 
-		c.r = rand() % 256;
-		c.g = rand() % 256;
-		c.b = rand() % 256;
-		// c.r = 0;
-		// c.g = 0;
-		// c.b = 255;
-		c.a = 255;
+		color.r = rand() % 256;
+		color.g = rand() % 256;
+		color.b = rand() % 256;
+		// color.r = 0;
+		// color.g = 0;
+		// color.b = 255;
+		color.a = 255;
 
-		d.PlacePixel(c, {x, y});
-		// points[point_index] = {x, y};
-		// if (point_index + 1 < point_count)
-		// 	point_index++;
-		// else
-		// 	point_index = 0;
+		d.PlacePixel(color, {x, y});
 	}
+
 	d.Present();
+
 	d.LogInfo(format("{} frames made", frameCount));
 
 	d.WaitToClose();
