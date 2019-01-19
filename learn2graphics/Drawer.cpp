@@ -4,13 +4,16 @@
 //Constructor for Drawer, takes dimensions for the canvas
 Drawer::Drawer(int width, int height)
 { 
+	closed = false;
+
 	//canvas dimensions
 	width_ = width;
 	height_ = height;
+	bufferSize_ = width * height;
 
 	// we draw all of our pixels to a cpu buffer first
 	// then copy that to a buffer in the gpu so that it can be displayed
-	bufferCPU_ = new Uint32[width_ * height_];
+	bufferCPU_ = new Uint32[bufferSize_];
 	pixelPitch_ = width_ * sizeof(Uint32);
 
 	//set initial cpu buffer color to black
@@ -37,21 +40,28 @@ Drawer::Drawer(int width, int height)
 
 // place a pixel to the 
 void Drawer::PlacePixel(Color color, Point point)
+{	
+	PlacePixel(color, point.y * width_ + point.x);
+}
+
+void Drawer::PlacePixel(Color color, int bufferIndex)
 {
 	//bounds check
-	if (point.x >= width_ || point.y >= height_)
+	if (bufferIndex > bufferSize_ - 1)
 	{
 		LogError(fmt::format(
-			"Attempted to place pixel out of bounds: {0}, {1}", point.x, point.y));
+			"Attempted to place pixel out of bounds, buffer index: {}", bufferIndex));
 		return;
 	}
+
 	//texure format is ARGB 8888
 	//might have to work on making this faster, can't directly cast the struct
 	//so have to do a little bit manipulation thingy
 	//ARGB, but we start on the left hand side of the bits
 	Uint32 pixel = color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
-	bufferCPU_[point.y * width_ + point.x] = pixel;
+	bufferCPU_[bufferIndex] = pixel;
 }
+
 
 // Place four pixels at a time, since it seems like processors
 // like to do things in groups of fours. Might axe this function
@@ -81,6 +91,9 @@ void Drawer::Present()
 //by closing down
 void Drawer::WaitForUser()
 {
+	//clear event queue before initiating wait
+	while (SDL_PollEvent(&event_) != 0) {}
+
 	bool quit = false;
 	bool user_input = false;
 
@@ -140,16 +153,38 @@ void Drawer::WaitToClose()
     Close();
 }
 
+void Drawer::CheckForClose()
+{
+	//go through event queue and check for close events
+	//throw away other events
+	while (SDL_PollEvent(&event_) != 0)
+	{
+		if (event_.type == SDL_QUIT)
+		{
+			Close();
+			return;
+		}
+	}
+}
+
+bool Drawer::IsClosed()
+{
+	return closed;
+}
 
 // clean up our stuff and close
 void Drawer::Close()
 {
-	delete[] bufferCPU_;
+	if (!closed)
+	{	
+		delete[] bufferCPU_;
 
-	SDL_DestroyTexture(bufferGPU_);
-	SDL_DestroyRenderer(renderer_);
-	SDL_DestroyWindow(window_);
-    SDL_Quit();
+		SDL_DestroyTexture(bufferGPU_);
+		SDL_DestroyRenderer(renderer_);
+		SDL_DestroyWindow(window_);
+	    SDL_Quit();
+		closed = true;
+	}
 }
 
 void Drawer::CheckForSdlError()
@@ -180,4 +215,88 @@ void Drawer::LogInfo(std::string message)
 void Drawer::LogError(std::string message)
 {
 	SDL_LogError(0, message.c_str());
+}
+
+//ripped from intel's site
+//Used to seed the generator.
+void Drawer::SeedRandomGenerator( int seed )
+{
+	g_seed = seed;
+}
+
+//fastrand routine returns one integer, similar output value range as C lib.
+//does not go below 0
+//max: int exclusive roof
+int Drawer::GetRandom(int max)
+{
+	g_seed = (214013*g_seed+2531011);
+	return ((g_seed>>16)&0x7FFF) % max;
+}
+
+void Drawer::RGBtoHSL(const Color& color, Uint32& h, Uint32& s, Uint32& l)
+{
+	Uint32 r = color.r;
+	Uint32 g = color.g;
+	Uint32 b = color.b;
+
+	double r_percent = ((double)r)/255;
+	double g_percent = ((double)g)/255;
+	double b_percent = ((double)b)/255;
+
+	double max_color = 0;
+	if((r_percent >= g_percent) && (r_percent >= b_percent))
+		max_color = r_percent;
+	if((g_percent >= r_percent) && (g_percent >= b_percent))
+		max_color = g_percent;
+	if((b_percent >= r_percent) && (b_percent >= g_percent))
+		max_color = b_percent;
+
+	double min_color = 0;
+	if((r_percent <= g_percent) && (r_percent <= b_percent))
+		min_color = r_percent;
+	if((g_percent <= r_percent) && (g_percent <= b_percent))
+		min_color = g_percent;
+	if((b_percent <= r_percent) && (b_percent <= g_percent))
+		min_color = b_percent;
+
+	double L = 0;
+	double S = 0;
+	double H = 0;
+
+	L = (max_color + min_color)/2;
+
+	if(max_color == min_color)
+	{
+		S = 0;
+		H = 0;
+	}
+	else
+	{
+		if(L < .50)
+		{
+			S = (max_color - min_color)/(max_color + min_color);
+		}
+		else
+		{
+			S = (max_color - min_color)/(2 - max_color - min_color);
+		}
+		if(max_color == r_percent)
+		{
+			H = (g_percent - b_percent)/(max_color - min_color);
+		}
+		if(max_color == g_percent)
+		{
+			H = 2 + (b_percent - r_percent)/(max_color - min_color);
+		}
+		if(max_color == b_percent)
+		{
+			H = 4 + (r_percent - g_percent)/(max_color - min_color);
+		}
+	}
+	s = (Uint32)(S*100);
+	l = (Uint32)(L*100);
+	H = H*60;
+	if(H < 0)
+		H += 360;
+	h = (Uint32)H;
 }
