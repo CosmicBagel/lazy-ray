@@ -26,6 +26,7 @@ public:
 	void WaitToClose();
 	void WaitForUser();
 	void Close();
+	void CheckForSdlError();
 
 	void LogInfo(std::string message);
 	void LogError(std::string message);

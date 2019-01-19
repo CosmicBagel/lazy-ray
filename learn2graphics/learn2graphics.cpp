@@ -50,6 +50,8 @@ int main(int argc, char ** argv)
 			}
 		}
 
+		//looking into a faster way to do this,
+		//generally want to play around with SIMD as much as I can in this proj
 		color.r = rand() % 256;
 		color.g = rand() % 256;
 		color.b = rand() % 256;

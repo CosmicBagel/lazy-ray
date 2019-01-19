@@ -30,6 +30,9 @@ Drawer::Drawer(int width, int height)
 	//Texture is target since we plan on rendering to it (see SDL documentation)
 	bufferGPU_ = SDL_CreateTexture(renderer_,
 		SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, width_, height_);
+
+	//just in case there was an error while initializing
+	CheckForSdlError();
 }
 
 // place a pixel to the 
@@ -68,6 +71,9 @@ void Drawer::Present()
 	SDL_RenderClear(renderer_);
 	SDL_RenderCopy(renderer_, bufferGPU_, NULL, NULL);
 	SDL_RenderPresent(renderer_);
+
+	//just in case there was an error while rendering this last frame
+	CheckForSdlError();
 }
 
 //Wait for the user to press literally any button or key
@@ -144,6 +150,16 @@ void Drawer::Close()
 	SDL_DestroyRenderer(renderer_);
 	SDL_DestroyWindow(window_);
     SDL_Quit();
+}
+
+void Drawer::CheckForSdlError()
+{
+	auto e = SDL_GetError();
+	if (sizeof(e) != 0 )
+	{
+		LogError(fmt::format("SDL_Error: {}", e));
+		SDL_ClearError();
+	}
 }
 
 //Log information using normal c++ strings, fmt::format is also
