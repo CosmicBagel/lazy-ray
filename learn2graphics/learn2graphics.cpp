@@ -3,6 +3,7 @@
 
 #include "fmt/format.h"
 
+#include "vec3.h"
 #include "Drawer.h"
 
 using std::string;
@@ -126,20 +127,13 @@ int main(int argc, char ** argv)
 
 	// d.WaitForUser();
 
-	float r = 0.0f;
-	float g = 0.0f;
-	float b = 0.0f;
-
-	while (frameCount < 1)
+	while (frameCount < 60)
 	{
+		vec3 flColor(float(x) / float(width), float(height - y) / float(height), 0.2f);
 
-		r = float(x) / float(width);
-		g = float(height - y) / float(height);
-		b = 0.2f;
-
-		color.r = static_cast<Uint8>(r * 255.99f);
-		color.g = static_cast<Uint8>(g * 255.99f);
-		color.b = static_cast<Uint8>(b * 255.99f);
+		color.r = static_cast<Uint8>(flColor[0] * 255.99f);
+		color.g = static_cast<Uint8>(flColor[1] * 255.99f);
+		color.b = static_cast<Uint8>(flColor[2] * 255.99f);
 		color.a = 255;
 
 		d.PlacePixel(color, {x, y});
