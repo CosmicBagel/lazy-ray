@@ -123,11 +123,12 @@ int main(int argc, char ** argv)
 
 	//std::vector<Color> * generated_colors = new std::vector<Color>(width*height, color);
 	int frameCount = 0;
+	int framesToRender = 10;
 	//iterate through each pixel on the canvas and plot a whole bunch of times
 
 	// d.WaitForUser();
-
-	while (frameCount < 60)
+	clock_t startTime = clock();
+	while (frameCount < framesToRender)
 	{
 		vec3 flColor(float(x) / float(width), float(height - y) / float(height), 0.2f);
 
@@ -160,8 +161,13 @@ int main(int argc, char ** argv)
 			}
 		}
 	}
+	clock_t endTime = clock();
 
-	d.LogInfo(format("{} frames made", frameCount));
+	double timeElapsed = (endTime - startTime) / CLOCKS_PER_SEC;
+	double aproxTimePerFrame = timeElapsed / framesToRender;
+
+	d.LogInfo(format("{} frames made in {}s\nAprox {}s per frame", 
+		frameCount, timeElapsed, aproxTimePerFrame));
 
 	d.WaitForUser();
 
