@@ -2,7 +2,7 @@
 #include "fmt/format.h"
 
 //Constructor for Drawer, takes dimensions for the canvas
-Drawer::Drawer(int width, int height)
+Drawer::Drawer(const int width, const int height, const char* windowTitle)
 { 
 	closed = false;
 
@@ -23,7 +23,7 @@ Drawer::Drawer(int width, int height)
 	//is just a graphical learning project
     SDL_Init(SDL_INIT_VIDEO);
 
-    window_ = SDL_CreateWindow("SDL2 Pixel Drawing",
+    window_ = SDL_CreateWindow(windowTitle,
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_, height_, 0);
 
 	renderer_ = SDL_CreateRenderer(window_, -1, 0);

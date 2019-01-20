@@ -24,7 +24,7 @@ private:
 
 	unsigned int g_seed;
 public:
-	Drawer(int width, int height);
+	Drawer(const int width, const int height, const char* windowTitle);
 
 	void PlacePixel(Color const& color, Point const& point)
 	{

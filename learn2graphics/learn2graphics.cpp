@@ -106,7 +106,7 @@ int main(int argc, char ** argv)
 	const int height = 480;
 
 	//create window, initialize all the drawing stuff
-    Drawer d(width, height);
+    Drawer d(width, height, "Ray Tracer");
 
 	//Seed the random number generator
 	d.SeedRandomGenerator(static_cast<int>(time(nullptr)));
@@ -163,10 +163,10 @@ int main(int argc, char ** argv)
 	}
 	clock_t endTime = clock();
 
-	double timeElapsed = (endTime - startTime) / CLOCKS_PER_SEC;
-	double aproxTimePerFrame = timeElapsed / framesToRender;
+	double timeElapsed = double(endTime - startTime) / CLOCKS_PER_SEC;
+	double aproxTimePerFrame = timeElapsed / framesToRender * 1000;
 
-	d.LogInfo(format("{} frames made in {}s\nAprox {}s per frame", 
+	d.LogInfo(format("{} frames made in {}s\nAprox {}ms per frame", 
 		frameCount, timeElapsed, aproxTimePerFrame));
 
 	d.WaitForUser();
