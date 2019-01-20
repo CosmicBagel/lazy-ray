@@ -111,8 +111,8 @@ int main(int argc, char ** argv)
 	d.SeedRandomGenerator(static_cast<int>(time(nullptr)));
 
 	//vars to be used in the main drawing loop
-	int x = 0;
-	int y = 0;
+	int x = width - 1;
+	int y = height - 1;
 	Color color = {255, 0, 0, 255};
 	
 
@@ -124,44 +124,37 @@ int main(int argc, char ** argv)
 	int frameCount = 0;
 	//iterate through each pixel on the canvas and plot a whole bunch of times
 
-	d.WaitForUser();
+	// d.WaitForUser();
+
+	float r = 0.0f;
+	float g = 0.0f;
+	float b = 0.0f;
 
 	while (frameCount < 1)
 	{
-		// //looking into a faster way to do this,
-		// //generally want to play around with SIMD as much as I can in this proj
-		// //https://software.intel.com/en-us/articles/fast-random-number-generator-on-the-intel-pentiumr-4-processor/
-		// color.r = d.GetRandom(256);
-		// color.g = d.GetRandom(256);
-		// color.b = d.GetRandom(256);
-		color.r = 0;
-		color.g = 0;
-		color.b = 255;
+
+		r = float(x) / float(width);
+		g = float(height - y) / float(height);
+		b = 0.2f;
+
+		color.r = static_cast<Uint8>(r * 255.99f);
+		color.g = static_cast<Uint8>(g * 255.99f);
+		color.b = static_cast<Uint8>(b * 255.99f);
 		color.a = 255;
 
 		d.PlacePixel(color, {x, y});
-		// Color * c = &generated_colors->at(y * width + x);
-		// c->r = color.r;
-		// c->g = color.g;
-		// c->b = color.b;
 
-		if (x+1 < width) 
-			x++;
+		if (x > 0) 
+			x--;
 		else
 		{
-			x = 0;
-			if (y+1 < height) 
-				y++; 
+			x = width - 1;
+			if (y > 0) 
+				y--; 
 			else {
-				y = 0;
-				//reset the pixel we're writing to
+				y = height - 1;
+				//reset the draw point
 				//show frame, increment frame count
-				// int total = width * height;
-				//
-				// std::sort(generated_colors->begin(), generated_colors->end(), prettySort);
-				// // std::sort(generated_colors->begin(), generated_colors->end(), sortByLightness);
-				// for (int i = 0; i < total - 1; i++)
-				// 	d.PlacePixel(generated_colors->at(i), i);
 
 				d.Present();
 				frameCount++;
