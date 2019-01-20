@@ -73,7 +73,6 @@ bool sortByLightness(Color left_hand, Color right_hand)
 bool prettySort(Color left_hand, Color right_hand)
 {
 	//true left-hand is greater, false right-hand is greater
-	bool result;
 	Uint32 lh_h;
 	Uint32 lh_s;
 	Uint32 lh_l;
@@ -121,32 +120,35 @@ int main(int argc, char ** argv)
 	// it's taking to draw the frames
 	//d.WaitForUser();
 
-	std::vector<Color> * generated_colors = new std::vector<Color>(width*height, color);
+	//std::vector<Color> * generated_colors = new std::vector<Color>(width*height, color);
 	int frameCount = 0;
 	//iterate through each pixel on the canvas and plot a whole bunch of times
-	while  (frameCount < 1)
+
+	d.WaitForUser();
+
+	while (frameCount < 4)
 	{
 		//stay response to quit events
-		d.CheckForClose();
-		if (d.IsClosed())
-			break;
+		// d.CheckForClose();
+		// if (d.IsClosed())
+		// 	break;
 
-		//looking into a faster way to do this,
-		//generally want to play around with SIMD as much as I can in this proj
-		//https://software.intel.com/en-us/articles/fast-random-number-generator-on-the-intel-pentiumr-4-processor/
-		color.r = d.GetRandom(256);
-		color.g = d.GetRandom(256);
-		color.b = d.GetRandom(256);
-		// color.r = 0;
-		// color.g = 0;
-		// color.b = 255;
+		// //looking into a faster way to do this,
+		// //generally want to play around with SIMD as much as I can in this proj
+		// //https://software.intel.com/en-us/articles/fast-random-number-generator-on-the-intel-pentiumr-4-processor/
+		// color.r = d.GetRandom(256);
+		// color.g = d.GetRandom(256);
+		// color.b = d.GetRandom(256);
+		color.r = 0;
+		color.g = 0;
+		color.b = 255;
 		color.a = 255;
 
-		//d.PlacePixel(color, {x, y});
-		Color * c = &generated_colors->at(y * width + x);
-		c->r = color.r;
-		c->g = color.g;
-		c->b = color.b;
+		d.PlacePixel(color, {x, y});
+		// Color * c = &generated_colors->at(y * width + x);
+		// c->r = color.r;
+		// c->g = color.g;
+		// c->b = color.b;
 
 		if (x+1 < width) 
 			x++;
@@ -159,12 +161,12 @@ int main(int argc, char ** argv)
 				y = 0;
 				//reset the pixel we're writing to
 				//show frame, increment frame count
-				int total = width * height;
-				
-				std::sort(generated_colors->begin(), generated_colors->end(), prettySort);
-				// std::sort(generated_colors->begin(), generated_colors->end(), sortByLightness);
-				for (int i = 0; i < total - 1; i++)
-					d.PlacePixel(generated_colors->at(i), i);
+				// int total = width * height;
+				//
+				// std::sort(generated_colors->begin(), generated_colors->end(), prettySort);
+				// // std::sort(generated_colors->begin(), generated_colors->end(), sortByLightness);
+				// for (int i = 0; i < total - 1; i++)
+				// 	d.PlacePixel(generated_colors->at(i), i);
 
 				d.Present();
 				frameCount++;
