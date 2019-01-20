@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
+#include "fmt/format.h"
 
 using Point = SDL_Point;
 using Color = SDL_Color;
@@ -24,8 +25,28 @@ private:
 	unsigned int g_seed;
 public:
 	Drawer(int width, int height);
-	void PlacePixel(Color color, Point point);
-	void PlacePixel(Color color, int bufferIndex);
+
+	void PlacePixel(Color const& color, Point const& point)
+	{
+		PlacePixel(color, point.y * width_ + point.x);
+	}
+	void PlacePixel(Color const& color, int const& bufferIndex)
+	{
+		//bounds check
+		if (bufferIndex > bufferSize_ - 1)
+		{
+			LogError(fmt::format(
+				"Attempted to place pixel out of bounds, buffer index: {}", bufferIndex));
+			return;
+		}
+
+		//texure format is ARGB 8888
+		//might have to work on making this faster, can't directly cast the struct
+		//so have to do a little bit manipulation thingy
+		//ARGB, but we start on the left hand side of the bits
+		bufferCPU_[bufferIndex] = color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
+	}
+
 	void PlacePixelQuad(Color colors[], Point points[]);
 	void Present();
 	void WaitToClose();

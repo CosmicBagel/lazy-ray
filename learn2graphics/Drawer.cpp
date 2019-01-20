@@ -39,28 +39,28 @@ Drawer::Drawer(int width, int height)
 }
 
 // place a pixel to the 
-void Drawer::PlacePixel(Color color, Point point)
-{	
-	PlacePixel(color, point.y * width_ + point.x);
-}
+// inline void Drawer::PlacePixel(Color const& color, Point const& point)
+// {	
+// 	PlacePixel(color, point.y * width_ + point.x);
+// }
 
-void Drawer::PlacePixel(Color color, int bufferIndex)
-{
-	//bounds check
-	if (bufferIndex > bufferSize_ - 1)
-	{
-		LogError(fmt::format(
-			"Attempted to place pixel out of bounds, buffer index: {}", bufferIndex));
-		return;
-	}
-
-	//texure format is ARGB 8888
-	//might have to work on making this faster, can't directly cast the struct
-	//so have to do a little bit manipulation thingy
-	//ARGB, but we start on the left hand side of the bits
-	Uint32 pixel = color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
-	bufferCPU_[bufferIndex] = pixel;
-}
+// inline void Drawer::PlacePixel(Color const& color, int const& bufferIndex)
+// {
+// 	//bounds check
+// 	if (bufferIndex > bufferSize_ - 1)
+// 	{
+// 		LogError(fmt::format(
+// 			"Attempted to place pixel out of bounds, buffer index: {}", bufferIndex));
+// 		return;
+// 	}
+//
+// 	//texure format is ARGB 8888
+// 	//might have to work on making this faster, can't directly cast the struct
+// 	//so have to do a little bit manipulation thingy
+// 	//ARGB, but we start on the left hand side of the bits
+// 	Uint32 pixel = color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
+// 	bufferCPU_[bufferIndex] = pixel;
+// }
 
 
 // Place four pixels at a time, since it seems like processors
