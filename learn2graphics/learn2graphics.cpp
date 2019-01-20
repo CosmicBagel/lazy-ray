@@ -10,19 +10,6 @@ using std::string;
 using std::to_string;
 using fmt::format;
 
-//todo separate logging into its own class
-
-//todo research SIMD, (and other single thread things that go fast)
-//todo implement a fast random
-//todo implement fast color to unit32 conversion
-//todo implement fast cpu buffer writing
-
-//todo implement frame time tracker (ms prolly)
-//todo implement just enough gui stuff to display mean, median, and mode frame time stats
-//todo implement frame time jitter tracking
-
-//todo implement frame breakdown chart (section for each part of the render)
-
 bool sortByHue(Color left_hand, Color right_hand)
 {
 	Uint32 lh_h;
@@ -99,6 +86,7 @@ bool prettySort(Color left_hand, Color right_hand)
 		return lh_h+lh_s < rh_h+lh_s;
 }
 
+//going to make more of a path tracer but w/e
 int main(int argc, char ** argv)
 {
 	//the dimensions we'll be using for the canvas
@@ -115,19 +103,14 @@ int main(int argc, char ** argv)
 	int x = width - 1;
 	int y = height - 1;
 	Color color = {255, 0, 0, 255};
-	
-
-	// waiting before starting drawing so that I can get a better feel of how long
-	// it's taking to draw the frames
-	//d.WaitForUser();
 
 	//std::vector<Color> * generated_colors = new std::vector<Color>(width*height, color);
 	int frameCount = 0;
 	int framesToRender = 10;
-	//iterate through each pixel on the canvas and plot a whole bunch of times
 
-	// d.WaitForUser();
+	//track time of render
 	clock_t startTime = clock();
+
 	while (frameCount < framesToRender)
 	{
 		vec3 flColor(float(x) / float(width), float(height - y) / float(height), 0.2f);

@@ -1,6 +1,19 @@
 #include "Drawer.h"
 #include "fmt/format.h"
 
+//todo separate logging into its own class
+
+//todo research SIMD, (and other single thread things that go fast)
+//todo put fast random into its own class
+//todo implement faster color to unit32 conversion
+//todo implement faster cpu buffer writing
+
+//todo implement frame time tracker (ms prolly)
+//todo implement just enough gui stuff to display mean, median, and mode frame time stats
+//todo implement frame time jitter tracking
+
+//todo implement frame breakdown chart (section for each part of the render)
+
 //Constructor for Drawer, takes dimensions for the canvas
 Drawer::Drawer(const int width, const int height, const char* windowTitle)
 { 
