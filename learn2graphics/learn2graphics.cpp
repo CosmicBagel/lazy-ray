@@ -126,13 +126,8 @@ int main(int argc, char ** argv)
 
 	d.WaitForUser();
 
-	while (frameCount < 4)
+	while (frameCount < 1)
 	{
-		//stay response to quit events
-		// d.CheckForClose();
-		// if (d.IsClosed())
-		// 	break;
-
 		// //looking into a faster way to do this,
 		// //generally want to play around with SIMD as much as I can in this proj
 		// //https://software.intel.com/en-us/articles/fast-random-number-generator-on-the-intel-pentiumr-4-processor/
@@ -170,6 +165,11 @@ int main(int argc, char ** argv)
 
 				d.Present();
 				frameCount++;
+
+				//stay response to quit events
+				d.CheckForClose();
+				if (d.IsClosed())
+					break;
 			}
 		}
 	}
