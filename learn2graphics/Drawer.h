@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "fmt/format.h"
+#include <time.h>
 
 using Point = SDL_Point;
 using Color = SDL_Color;
@@ -45,6 +46,7 @@ public:
 		//so have to do a little bit manipulation thingy
 		//ARGB, but we start on the left hand side of the bits
 		bufferCPU_[bufferIndex] = color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
+		//bufferCPU_[bufferIndex] = 0;
 	}
 
 	void PlacePixelQuad(Color colors[], Point points[]);

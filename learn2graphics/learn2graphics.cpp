@@ -1,9 +1,10 @@
 #include <stdlib.h>
+// #include <chrono>
 #include <time.h>
-
 #include "fmt/format.h"
 
 #include "vec3.h"
+#include  "ray.h"
 #include "Drawer.h"
 
 using std::string;
@@ -108,49 +109,76 @@ int main(int argc, char ** argv)
 	int frameCount = 0;
 	int framesToRender = 10;
 
-	//track time of render
-	clock_t startTime = clock();
+	int bufferIndex = 0;
+	int bufferSize = (width * height) - 1;
 
+	//track time stats	
+	clock_t totalTimePixel = 0;
+	clock_t totalTimeColorCalc = 0;
+	clock_t totalTimeFrameFlip = 0;
+
+	clock_t startTimeRender = clock();
 	while (frameCount < framesToRender)
 	{
-		vec3 flColor(float(x) / float(width), float(height - y) / float(height), 0.2f);
-
-		color.r = static_cast<Uint8>(flColor[0] * 255.99f);
-		color.g = static_cast<Uint8>(flColor[1] * 255.99f);
-		color.b = static_cast<Uint8>(flColor[2] * 255.99f);
-		color.a = 255;
-
-		d.PlacePixel(color, {x, y});
-
-		if (x > 0) 
-			x--;
-		else
+		for (int x = width - 1; x >= 0; x--)
 		{
-			x = width - 1;
-			if (y > 0) 
-				y--; 
-			else {
-				y = height - 1;
-				//reset the draw point
-				//show frame, increment frame count
+			for (int y = height - 1; y >= 0; y--)
+			{
+				clock_t startTimeColorCalc = clock();
+				vec3 flColor(float(x) / float(width), float(height - y) / float(height), 0.2f);
 
-				d.Present();
-				frameCount++;
+				color.r = static_cast<Uint8>(flColor[0] * 255.99f);
+				color.g = static_cast<Uint8>(flColor[1] * 255.99f);
+				color.b = static_cast<Uint8>(flColor[2] * 255.99f);
+				color.a = 255;
+				
+				clock_t endTimeColorCalc = clock();
+				
+				clock_t startPixel = endTimeColorCalc;
+				d.PlacePixel(color, {x, y});
+				//d.PlacePixel(color, bufferIndex);
+				clock_t endPixel = clock();
 
-				//stay response to quit events
-				d.CheckForClose();
-				if (d.IsClosed())
-					break;
+				totalTimePixel +=  endPixel - startPixel;
+				totalTimeColorCalc += endTimeColorCalc - startTimeColorCalc;
 			}
 		}
+
+		clock_t startFrameFlip = clock();
+		// show frame
+		d.Present();
+		frameCount++;
+
+		//stay response to quit events
+		d.CheckForClose();
+		if (d.IsClosed())
+			break;
+		clock_t endFrameFlip = clock();
+		totalTimeFrameFlip += endFrameFlip - startFrameFlip;
+
 	}
-	clock_t endTime = clock();
+	clock_t endTimeRender = clock();
 
-	double timeElapsed = double(endTime - startTime) / CLOCKS_PER_SEC;
-	double aproxTimePerFrame = timeElapsed / framesToRender * 1000;
+	double timeRatio = 1000.0 / CLOCKS_PER_SEC;
 
-	d.LogInfo(format("{} frames made in {}s\nAprox {}ms per frame", 
-		frameCount, timeElapsed, aproxTimePerFrame));
+	double renderTimeMs = (endTimeRender - startTimeRender) * timeRatio;
+	double colorCalcTimeMs = totalTimeColorCalc * timeRatio;
+	double pixelTimeMs = totalTimePixel * timeRatio;
+	double frameFlipTimeMs = totalTimeFrameFlip * timeRatio;
+
+	d.LogInfo(format("{} frames made in {}s\n\n", frameCount, renderTimeMs / 1000.0));
+
+
+	d.LogInfo(format("Color calc time total: {}ms", colorCalcTimeMs));
+	d.LogInfo(format("Color calc avg per frame: {}ms\n", colorCalcTimeMs / framesToRender));
+	d.LogInfo(format("Pixel time total: {}ms", pixelTimeMs));
+	d.LogInfo(format("Pixel avg per frame: {}ms\n", pixelTimeMs / framesToRender));
+	d.LogInfo(format("Frame flip total: {}ms", frameFlipTimeMs));
+	d.LogInfo(format("Frame flip avg per frame: {}ms\n", frameFlipTimeMs / framesToRender));
+
+	double trackedTimeTotal = colorCalcTimeMs + pixelTimeMs + frameFlipTimeMs;
+	d.LogInfo(format("\n\nTracked time total: {}ms\nAprox overhead: {}ms", 
+		trackedTimeTotal, renderTimeMs - trackedTimeTotal));
 
 	d.WaitForUser();
 
