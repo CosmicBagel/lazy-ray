@@ -108,10 +108,7 @@ int main(int argc, char ** argv)
 
 	//std::vector<Color> * generated_colors = new std::vector<Color>(width*height, color);
 	int frameCount = 0;
-	int framesToRender = 10;
-
-	int bufferIndex = 0;
-	int bufferSize = (width * height) - 1;
+	const int framesToRender = 1;
 
 	//track time stats	
 	clock_t totalPixelTime = 0;
@@ -134,32 +131,39 @@ int main(int argc, char ** argv)
 	{
 		clock_t pixelTimeStart = clock();
 		int pixelBatchCount = 0;
-		for (int x = width - 1; x >= 0; x--)
+		int batchesDone = 0;
+		int pixelCount = 0;
+		for (int x = 0; x < width; x++)
 		{
-			for (int y = height - 1; y >= 0; y--)
+			for (int y = 0; y < height; y++)
 			{
 				vec3 flColor(float(x) / float(width), float(height - y) / float(height), 0.2f);
 				
-				 color.r = static_cast<Uint8>(flColor[0] * 255.99f);
-				 color.g = static_cast<Uint8>(flColor[1] * 255.99f);
-				 color.b = static_cast<Uint8>(flColor[2] * 255.99f);
-				 color.a = 255;
+				color.r = static_cast<Uint8>(flColor[0] * 255.99f);
+				color.g = static_cast<Uint8>(flColor[1] * 255.99f);
+				color.b = static_cast<Uint8>(flColor[2] * 255.99f);
+				color.a = 255;
 
-				if (pixelBatchCount < pixelsPerBatch)
+				pixelBatch[pixelBatchCount] =
+					color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
+				pixelBatchCount++;
+
+				//640 * 480 = 307,200 / 16 = 19,200 expected batches
+				//is only completing 18070 batches for some reason...
+				if (pixelBatchCount >= pixelsPerBatch)
 				{
-					pixelBatch[pixelBatchCount] =
-						color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
-					pixelBatchCount++;
-				} else
-				{
-					d.PlacePixelBatch(pixelBatch, pixelsPerBatch);
 					pixelBatchCount = 0;
+					d.PlacePixelBatch(pixelBatch, pixelsPerBatch);
+					batchesDone += 1;
 				}
 
 				//d.PlacePixel(color, {x, y});
+				pixelCount++;
 			}
 		}
 		clock_t pixelTimeEnd = clock();
+		d.LogInfo(format("completed {:n} / 19,200 pixel batches", batchesDone));
+		d.LogInfo(format("completed {:n} / 307,200 pixels", pixelCount));
 
 		totalPixelTime += pixelTimeEnd - pixelTimeStart;
 
@@ -174,7 +178,6 @@ int main(int argc, char ** argv)
 			break;
 		clock_t endFrameFlip = clock();
 		totalTimeFrameFlip += endFrameFlip - startFrameFlip;
-
 	}
 	clock_t endTimeRender = clock();
 

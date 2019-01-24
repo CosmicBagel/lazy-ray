@@ -48,17 +48,16 @@ public:
 		//so have to do a little bit manipulation thingy
 		//ARGB, but we start on the left hand side of the bits
 		bufferCPU_[bufferIndex] = color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
-		//bufferCPU_[bufferIndex] = 0;
 	}
 
+	//should run 19,200 times a frame
 	void PlacePixelBatch(Uint32 const* batch, int const& batchCount)
 	{
-		int batchSize = sizeof(Uint32) * batchCount;
-		int offset = bufferWriteOffset_;
-
+		int batchSize = sizeof(Uint32) * batchCount; //64 bytes
+		Uint32 * p = bufferCPU_ + bufferWriteOffset_;
 		//when doing pointer arithmetic, each addition is in fact four bytes
 		//eg p + 1, advances the pointer by four bytes, note one byte
-		memcpy(bufferCPU_ + offset, batch, batchSize);
+		memcpy(p, batch, batchSize);
 
 		bufferWriteOffset_ += batchCount;
 		if (bufferWriteOffset_ >= bufferSize_)

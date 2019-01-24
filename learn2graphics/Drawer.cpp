@@ -24,6 +24,7 @@ Drawer::Drawer(const int width, const int height, const char* windowTitle)
 	width_ = width;
 	height_ = height;
 	bufferSize_ = width * height;
+	bufferWriteOffset_ = 0;
 
 	// we draw all of our pixels to a cpu buffer first
 	// then copy that to a buffer in the gpu so that it can be displayed
@@ -95,6 +96,9 @@ void Drawer::Present()
 	SDL_RenderClear(renderer_);
 	SDL_RenderCopy(renderer_, bufferGPU_, NULL, NULL);
 	SDL_RenderPresent(renderer_);
+
+	//reset cpu buffer to black
+	memset(bufferCPU_, 0, width_ * height_ * sizeof(Uint32));
 
 	//just in case there was an error while rendering this last frame
 	CheckForSdlError();
