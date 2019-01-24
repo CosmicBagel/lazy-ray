@@ -103,7 +103,8 @@ int main(int argc, char ** argv)
 	d.SeedRandomGenerator(static_cast<int>(time(nullptr)));
 
 	//vars to be used in the main drawing loop
-	Color color = {255, 0, 0, 255};
+	//unaltered color should produce a light sky blue, otherwise the color plotting is wrong
+	Color color = {50, 100, 200, 255};
 
 	//std::vector<Color> * generated_colors = new std::vector<Color>(width*height, color);
 	int frameCount = 0;
