@@ -11,8 +11,6 @@ using std::string;
 using std::to_string;
 using fmt::format;
 
-using SDL_Color_vector_ptr = std::unique_ptr<SDL_Color[]>;
-
 bool sortByHue(Color left_hand, Color right_hand)
 {
 	Uint32 lh_h;
@@ -106,22 +104,12 @@ int main(int argc, char ** argv)
 	//unaltered color should produce a light sky blue, otherwise the color plotting is wrong
 	Color color = {50, 100, 200, 255};
 
-	//std::vector<Color> * generated_colors = new std::vector<Color>(width*height, color);
 	int frameCount = 0;
-	const int framesToRender = 1;
+	const int framesToRender = 10;
 
 	//track time stats	
 	clock_t totalPixelTime = 0;
 	clock_t totalTimeFrameFlip = 0;
-
-	// d.WaitForUser();
-	Point point;
-	
-	int bufSize = width * height;
-
-	auto pixels = SDL_Color_vector_ptr(new SDL_Color[width*height]);
-	// std::vector<Uint32>* pixels = new std::vector<Uint32>(width*height);
-	// auto* pixels = new Uint32[width*height];
 
 	const int pixelsPerBatch = 16;
 	Uint32 pixelBatch[pixelsPerBatch];
@@ -131,13 +119,11 @@ int main(int argc, char ** argv)
 	{
 		clock_t pixelTimeStart = clock();
 		int pixelBatchCount = 0;
-		int batchesDone = 0;
-		int pixelCount = 0;
-		for (int x = 0; x < width; x++)
+		for (int y = 0; y < height; y++)
 		{
-			for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++)
 			{
-				vec3 flColor(float(x) / float(width), float(height - y) / float(height), 0.2f);
+				vec3 flColor(float(x) / float(width), float(y) / float(height), 0.2f);
 				
 				color.r = static_cast<Uint8>(flColor[0] * 255.99f);
 				color.g = static_cast<Uint8>(flColor[1] * 255.99f);
@@ -147,23 +133,15 @@ int main(int argc, char ** argv)
 				pixelBatch[pixelBatchCount] =
 					color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
 				pixelBatchCount++;
-
-				//640 * 480 = 307,200 / 16 = 19,200 expected batches
-				//is only completing 18070 batches for some reason...
+				
 				if (pixelBatchCount >= pixelsPerBatch)
 				{
 					pixelBatchCount = 0;
 					d.PlacePixelBatch(pixelBatch, pixelsPerBatch);
-					batchesDone += 1;
 				}
-
-				//d.PlacePixel(color, {x, y});
-				pixelCount++;
 			}
 		}
 		clock_t pixelTimeEnd = clock();
-		d.LogInfo(format("completed {:n} / 19,200 pixel batches", batchesDone));
-		d.LogInfo(format("completed {:n} / 307,200 pixels", pixelCount));
 
 		totalPixelTime += pixelTimeEnd - pixelTimeStart;
 
