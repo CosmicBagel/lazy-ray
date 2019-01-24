@@ -23,6 +23,8 @@ private:
 	int height_;
 	int bufferSize_;
 
+	int bufferWriteOffset_;
+
 	unsigned int g_seed;
 public:
 	Drawer(const int width, const int height, const char* windowTitle);
@@ -47,6 +49,21 @@ public:
 		//ARGB, but we start on the left hand side of the bits
 		bufferCPU_[bufferIndex] = color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
 		//bufferCPU_[bufferIndex] = 0;
+	}
+
+	void PlacePixelBatch(Uint32 const* batch, int const& batchCount)
+	{
+		int batchSize = sizeof(Uint32) * batchCount;
+		int offset = bufferWriteOffset_;
+
+		//when doing pointer arithmetic, each addition is in fact four bytes
+		//eg p + 1, advances the pointer by four bytes, note one byte
+		memcpy(bufferCPU_ + offset, batch, batchSize);
+
+		bufferWriteOffset_ += batchCount;
+		if (bufferWriteOffset_ >= bufferSize_)
+			bufferWriteOffset_ = 0;
+
 	}
 
 	void PlacePixelQuad(Color colors[], Point points[]);

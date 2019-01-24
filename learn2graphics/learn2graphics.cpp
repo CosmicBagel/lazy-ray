@@ -11,6 +11,8 @@ using std::string;
 using std::to_string;
 using fmt::format;
 
+using SDL_Color_vector_ptr = std::unique_ptr<SDL_Color[]>;
+
 bool sortByHue(Color left_hand, Color right_hand)
 {
 	Uint32 lh_h;
@@ -101,8 +103,6 @@ int main(int argc, char ** argv)
 	d.SeedRandomGenerator(static_cast<int>(time(nullptr)));
 
 	//vars to be used in the main drawing loop
-	int x = width - 1;
-	int y = height - 1;
 	Color color = {255, 0, 0, 255};
 
 	//std::vector<Color> * generated_colors = new std::vector<Color>(width*height, color);
@@ -113,36 +113,54 @@ int main(int argc, char ** argv)
 	int bufferSize = (width * height) - 1;
 
 	//track time stats	
-	clock_t totalTimePixel = 0;
-	clock_t totalTimeColorCalc = 0;
+	clock_t totalPixelTime = 0;
 	clock_t totalTimeFrameFlip = 0;
+
+	// d.WaitForUser();
+	Point point;
+	
+	int bufSize = width * height;
+
+	auto pixels = SDL_Color_vector_ptr(new SDL_Color[width*height]);
+	// std::vector<Uint32>* pixels = new std::vector<Uint32>(width*height);
+	// auto* pixels = new Uint32[width*height];
+
+	const int pixelsPerBatch = 16;
+	Uint32 pixelBatch[pixelsPerBatch];
 
 	clock_t startTimeRender = clock();
 	while (frameCount < framesToRender)
 	{
+		clock_t pixelTimeStart = clock();
+		int pixelBatchCount = 0;
 		for (int x = width - 1; x >= 0; x--)
 		{
 			for (int y = height - 1; y >= 0; y--)
 			{
-				clock_t startTimeColorCalc = clock();
 				vec3 flColor(float(x) / float(width), float(height - y) / float(height), 0.2f);
-
-				color.r = static_cast<Uint8>(flColor[0] * 255.99f);
-				color.g = static_cast<Uint8>(flColor[1] * 255.99f);
-				color.b = static_cast<Uint8>(flColor[2] * 255.99f);
-				color.a = 255;
 				
-				clock_t endTimeColorCalc = clock();
-				
-				clock_t startPixel = endTimeColorCalc;
-				d.PlacePixel(color, {x, y});
-				//d.PlacePixel(color, bufferIndex);
-				clock_t endPixel = clock();
+				 color.r = static_cast<Uint8>(flColor[0] * 255.99f);
+				 color.g = static_cast<Uint8>(flColor[1] * 255.99f);
+				 color.b = static_cast<Uint8>(flColor[2] * 255.99f);
+				 color.a = 255;
 
-				totalTimePixel +=  endPixel - startPixel;
-				totalTimeColorCalc += endTimeColorCalc - startTimeColorCalc;
+				if (pixelBatchCount < pixelsPerBatch)
+				{
+					pixelBatch[pixelBatchCount] =
+						color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
+					pixelBatchCount++;
+				} else
+				{
+					d.PlacePixelBatch(pixelBatch, pixelsPerBatch);
+					pixelBatchCount = 0;
+				}
+
+				//d.PlacePixel(color, {x, y});
 			}
 		}
+		clock_t pixelTimeEnd = clock();
+
+		totalPixelTime += pixelTimeEnd - pixelTimeStart;
 
 		clock_t startFrameFlip = clock();
 		// show frame
@@ -162,25 +180,23 @@ int main(int argc, char ** argv)
 	double timeRatio = 1000.0 / CLOCKS_PER_SEC;
 
 	double renderTimeMs = (endTimeRender - startTimeRender) * timeRatio;
-	double colorCalcTimeMs = totalTimeColorCalc * timeRatio;
-	double pixelTimeMs = totalTimePixel * timeRatio;
+	double pixelTimeMs = totalPixelTime * timeRatio;
 	double frameFlipTimeMs = totalTimeFrameFlip * timeRatio;
 
 	d.LogInfo(format("{} frames made in {}s\n\n", frameCount, renderTimeMs / 1000.0));
 
-
-	d.LogInfo(format("Color calc time total: {}ms", colorCalcTimeMs));
-	d.LogInfo(format("Color calc avg per frame: {}ms\n", colorCalcTimeMs / framesToRender));
 	d.LogInfo(format("Pixel time total: {}ms", pixelTimeMs));
 	d.LogInfo(format("Pixel avg per frame: {}ms\n", pixelTimeMs / framesToRender));
 	d.LogInfo(format("Frame flip total: {}ms", frameFlipTimeMs));
 	d.LogInfo(format("Frame flip avg per frame: {}ms\n", frameFlipTimeMs / framesToRender));
 
-	double trackedTimeTotal = colorCalcTimeMs + pixelTimeMs + frameFlipTimeMs;
-	d.LogInfo(format("\n\nTracked time total: {}ms\nAprox overhead: {}ms", 
+	double trackedTimeTotal = pixelTimeMs + frameFlipTimeMs;
+	d.LogInfo(format("\n\nTracked time total: {}ms\nAprox time tracking overhead: {}ms", 
 		trackedTimeTotal, renderTimeMs - trackedTimeTotal));
 
 	d.WaitForUser();
+
+	
 
 	d.Close();
  
