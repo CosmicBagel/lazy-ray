@@ -7,6 +7,12 @@
 #include  "ray.h"
 #include "Drawer.h"
 
+#include <intrin.h>
+#include <Windows.h>
+// uint64_t rdtsc(){
+//     return __rdtsc();
+// }
+
 using std::string;
 using std::to_string;
 using fmt::format;
@@ -111,11 +117,23 @@ int main(int argc, char ** argv)
 	clock_t totalPixelTime = 0;
 	clock_t totalTimeFrameFlip = 0;
 
+	//8 bytes in a cache line * burst of 8 cpu does = 64 bytes
+	//4 bytes per pixel * 16 = 64 bytes
+	//I *think* this will make pushing pixels a bit more cache / memory latency friendly
 	const int pixelsPerBatch = 16;
 	Uint32 pixelBatch[pixelsPerBatch];
 
+	//extract this loop into drawer
+	//have drawer call pixel math function
+	LARGE_INTEGER pixelTotalCycles = { 0 };
+	LARGE_INTEGER pixelStart, pixelEnd;
+	LARGE_INTEGER memoryWriteTotalCycles = { 0 };
+	LARGE_INTEGER memoryWriteStart, memoryWriteEnd;
+
 	clock_t startTimeRender = clock();
+	// uint64_t processCyclesStart = __rdtsc();
 	while (frameCount < framesToRender)
+
 	{
 		clock_t pixelTimeStart = clock();
 		int pixelBatchCount = 0;
@@ -123,13 +141,16 @@ int main(int argc, char ** argv)
 		{
 			for (int x = 0; x < width; x++)
 			{
-				vec3 flColor(float(x) / float(width), float(y) / float(height), 0.2f);
-				
-				color.r = static_cast<Uint8>(flColor[0] * 255.99f);
-				color.g = static_cast<Uint8>(flColor[1] * 255.99f);
-				color.b = static_cast<Uint8>(flColor[2] * 255.99f);
-				color.a = 255;
+				QueryPerformanceCounter(&pixelStart);
+				// vec3 flColor(float(x) / float(width), float(y) / float(height), 0.2f);
+				//
+				// color.r = static_cast<Uint8>(flColor[0] * 255.99f);
+				// color.g = static_cast<Uint8>(flColor[1] * 255.99f);
+				// color.b = static_cast<Uint8>(flColor[2] * 255.99f);
+				// color.a = 255;
+				QueryPerformanceCounter(&pixelEnd);
 
+				QueryPerformanceCounter(&memoryWriteStart);
 				pixelBatch[pixelBatchCount] =
 					color.b | (color.g << 8) | (color.r << 16) | (color.a << 24);
 				pixelBatchCount++;
@@ -139,6 +160,12 @@ int main(int argc, char ** argv)
 					pixelBatchCount = 0;
 					d.PlacePixelBatch(pixelBatch, pixelsPerBatch);
 				}
+				QueryPerformanceCounter(&memoryWriteEnd);
+
+				pixelTotalCycles.QuadPart += 
+					pixelEnd.QuadPart - pixelStart.QuadPart;
+				memoryWriteTotalCycles.QuadPart += 
+					memoryWriteEnd.QuadPart - memoryWriteStart.QuadPart;
 			}
 		}
 		clock_t pixelTimeEnd = clock();
@@ -158,23 +185,36 @@ int main(int argc, char ** argv)
 		totalTimeFrameFlip += endFrameFlip - startFrameFlip;
 	}
 	clock_t endTimeRender = clock();
+	LARGE_INTEGER frequency; //__rdtsc() - processCyclesStart;
+	QueryPerformanceFrequency(&frequency);
 
-	double timeRatio = 1000.0 / CLOCKS_PER_SEC;
+	double msTimeRatio = 1000.0 / CLOCKS_PER_SEC;
 
-	double renderTimeMs = (endTimeRender - startTimeRender) * timeRatio;
-	double pixelTimeMs = totalPixelTime * timeRatio;
-	double frameFlipTimeMs = totalTimeFrameFlip * timeRatio;
+	double renderTimeMs = (endTimeRender - startTimeRender) * msTimeRatio;
+	double timePerFrameMs = renderTimeMs / frameCount;
+	double pixelTimeMs = totalPixelTime * msTimeRatio;
+	double frameFlipTimeMs = totalTimeFrameFlip * msTimeRatio;
 
-	d.LogInfo(format("{} frames made in {}s\n\n", frameCount, renderTimeMs / 1000.0));
+	// double aproxCyclesPerMs = processCycles / renderTimeMs;
+
+	d.LogInfo(format("aprox cycles per second during run: {}", frequency.QuadPart));
+
+	d.LogInfo(format("{} frames made at ~{}ms per frame ({:.0f} FPS)\n\n",
+		frameCount, timePerFrameMs, 1000 / timePerFrameMs ));
 
 	d.LogInfo(format("Pixel time total: {}ms", pixelTimeMs));
 	d.LogInfo(format("Pixel avg per frame: {}ms\n", pixelTimeMs / framesToRender));
-	d.LogInfo(format("Frame flip total: {}ms", frameFlipTimeMs));
-	d.LogInfo(format("Frame flip avg per frame: {}ms\n", frameFlipTimeMs / framesToRender));
 
-	double trackedTimeTotal = pixelTimeMs + frameFlipTimeMs;
-	d.LogInfo(format("\n\nTracked time total: {}ms\nAprox time tracking overhead: {}ms", 
-		trackedTimeTotal, renderTimeMs - trackedTimeTotal));
+	d.LogInfo(format("Pixel calculation time: {}ms per frame",
+		(pixelTotalCycles.QuadPart / frequency.QuadPart * 1000) / frameCount));
+	d.LogInfo(format("Memory write time: {}ms per frame",
+		(memoryWriteTotalCycles.QuadPart / frequency.QuadPart * 1000) / frameCount));
+
+	d.LogInfo(format("Frame flip total: {}ms", frameFlipTimeMs));
+	d.LogInfo(format("Frame flip avg per frame: {}ms\n\n\n", frameFlipTimeMs / framesToRender));
+
+	// double trackedTimeTotal = pixelTimeMs + frameFlipTimeMs;
+	d.LogInfo(format("Total render time: {}ms", renderTimeMs));
 
 	d.WaitForUser();
 
