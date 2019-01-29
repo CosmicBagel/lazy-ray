@@ -15,6 +15,8 @@ using fmt::format;
 //the dimensions we'll be using for the canvas
 const int width = 640;
 const int height = 480;
+const int framesToRender = 10;
+const string windowTitle = "Ray Tracer";
 
 inline void doColorThing(Color& color, int const& x, int const& y)
 {
@@ -30,7 +32,7 @@ inline void doColorThing(Color& color, int const& x, int const& y)
 int main(int argc, char ** argv)
 {
 	//create window, initialize all the drawing stuff
-    Drawer d(width, height, "Ray Tracer");
+    Drawer d(width, height, windowTitle.c_str());
 
 	//Seed the random number generator
 	d.SeedRandomGenerator(static_cast<int>(time(nullptr)));
@@ -44,8 +46,7 @@ int main(int argc, char ** argv)
 	color.a = 255;
 
 	int frameCount = 0;
-	const int framesToRender = 10;
-
+	
 	//track time stats	
 	clock_t totalPixelTime = 0;
 	clock_t totalTimeFrameFlip = 0;

@@ -68,7 +68,7 @@ public:
 	//should run 19,200 times a frame
 	void PlacePixelBatch(Uint32 const* batch, int const& batchCount)
 	{
-		int batchSize = sizeof(Uint32) * batchCount; //64 bytes
+		const int batchSize = sizeof(Uint32) * batchCount; //64 bytes
 		Uint32 * p = bufferCPU_ + bufferWriteOffset_;
 		//when doing pointer arithmetic, each addition is in fact four bytes
 		//eg p + 1, advances the pointer by four bytes, note one byte
