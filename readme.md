@@ -11,4 +11,5 @@ way. I'm just using it as a learning project with the goals of:
 ### License
 
 MIT
+
 *See license file for the boring legal stuff*
