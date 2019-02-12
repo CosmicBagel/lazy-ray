@@ -10,6 +10,6 @@ way. I'm just using it as a learning project with the goals of:
 
 ### License
 
-MIT
+[MIT](https://tldrlegal.com/license/mit-license)
 
 *See license file for the boring legal stuff*
