@@ -15,7 +15,7 @@ using fmt::format;
 //the dimensions we'll be using for the canvas
 const int width = 640;
 const int height = 480;
-const int framesToRender = 10;
+const int framesToRender = 1;
 const string windowTitle = "Ray Tracer";
 
 inline void doColorThing(Color& color, int const& x, int const& y)
