@@ -10,5 +10,5 @@ way. I'm just using it as a learning project with the goals of:
 
 ### License
 
-MIT (ie permition to do w/e you want with it, but I'm not liable for any issues you run into)
+MIT
 *See license file for the boring legal stuff*
