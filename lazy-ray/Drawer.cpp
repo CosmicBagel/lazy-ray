@@ -94,7 +94,8 @@ void Drawer::Present()
 	SDL_UpdateTexture(bufferGPU_, NULL, bufferCPU_, pixelPitch_);
 
 	SDL_RenderClear(renderer_);
-	SDL_RenderCopy(renderer_, bufferGPU_, NULL, NULL);
+	SDL_RenderCopyEx(renderer_, bufferGPU_, 
+		NULL, NULL, NULL, NULL, SDL_FLIP_VERTICAL);
 	SDL_RenderPresent(renderer_);
 
 	//reset cpu buffer to black
