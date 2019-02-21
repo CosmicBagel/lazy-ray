@@ -8,6 +8,10 @@ way. I'm just using it as a learning project with the goals of:
 - Maybe dabble with fancy speed stuff like SIMD instructions, writing cache friendly code,
   and parallelism
 
+### Dependencies
+I'm using vcpkg to make things simpler
+- SDL2 x86
+
 ### License
 
 [MIT](https://tldrlegal.com/license/mit-license)
