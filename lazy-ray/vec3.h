@@ -24,7 +24,8 @@ public:
 	inline float g() const {return e[1];}
 	inline float b() const {return e[2];}
 
-	//unary plus/minus ie when you go -5.1f or +5.1f (indicating positivity or negatvity of value)
+	//unary plus/minus eg when you go -5.1f or +5.1f (indicating positivity 
+	//or negativity of value)
 	inline const vec3& operator+() const {return *this;}
 	inline vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
 	//like array accessors
@@ -91,7 +92,8 @@ inline vec3 operator* (float t, const vec3 &v)
 	return vec3(t * v.e[0], t * v.e[1], t * v.e[2]);
 }
 
-//can divide a matrix by a scalar value, but can't divide a scalar value by a matrix
+//can divide a matrix by a scalar value, but can't divide a scalar value
+//by a matrix
 inline vec3 operator/ (vec3 v, float t)
 {
 	return vec3(v.e[0] / t, v.e[1] / t, v.e[2] / t);
@@ -105,7 +107,8 @@ inline vec3 operator* (const vec3 &v, float t)
 /////////////////////////
 //common linear algebra functions
 
-//unit vector is the direction of the vector, but it's length is scaled down to 1.0
+//unit vector is the direction of the vector, but it's length is scaled
+//down to 1.0
 //similar concept as normalize
 //turns self into a unit vector
 inline void vec3::make_unit_vector()

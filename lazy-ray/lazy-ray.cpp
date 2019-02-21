@@ -109,10 +109,12 @@ int main(int argc, char ** argv)
 		frameCount, timePerFrameMs, 1000 / timePerFrameMs ));
 
 	d.LogInfo(format("Pixel time total: {}ms", pixelTimeMs));
-	d.LogInfo(format("Pixel avg per frame: {}ms\n", pixelTimeMs / framesToRender));
+	d.LogInfo(format("Pixel avg per frame: {}ms\n", 
+		pixelTimeMs / framesToRender));
 
 	d.LogInfo(format("Frame flip total: {}ms", frameFlipTimeMs));
-	d.LogInfo(format("Frame flip avg per frame: {}ms\n\n\n", frameFlipTimeMs / framesToRender));
+	d.LogInfo(format("Frame flip avg per frame: {}ms\n\n\n",
+		frameFlipTimeMs / framesToRender));
 
 	d.LogInfo(format("Total render time: {}ms", renderTimeMs));
 
