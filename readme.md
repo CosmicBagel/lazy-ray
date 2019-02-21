@@ -13,6 +13,10 @@ I'm using vcpkg to make things simpler
 - SDL2 x86
 - FMT x86
 
+### Learning materials used
+- [Ray Tracing in One Weekend by Peter Shirley](https://github.com/petershirley/raytracinginoneweekend)
+- will move on to more as I go
+
 ### License
 
 [MIT](https://tldrlegal.com/license/mit-license)
