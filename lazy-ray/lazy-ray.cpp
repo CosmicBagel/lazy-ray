@@ -13,7 +13,7 @@ using std::to_string;
 using fmt::format;
 
 //the dimensions we'll be using for the canvas
-const int width = 640;
+const int width = 800;
 const int height = 480;
 const int framesToRender = 1;
 const string windowTitle = "Ray Tracer";
