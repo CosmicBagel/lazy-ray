@@ -11,6 +11,7 @@ way. I'm just using it as a learning project with the goals of:
 ### Dependencies
 I'm using vcpkg to make things simpler
 - SDL2 x86
+- FMT x86
 
 ### License
 
