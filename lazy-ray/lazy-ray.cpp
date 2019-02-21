@@ -16,7 +16,7 @@ using fmt::format;
 const int width = 800;
 const int height = 480;
 const int framesToRender = 1;
-const string windowTitle = "Ray Tracer";
+const string windowTitle = "Lazy-Ray";
 
 inline void doColorThing(Color& color, int const& x, int const& y)
 {
