@@ -1,3 +1,5 @@
+//from Ray Tracing in a Weekend by Peter Shirley
+//https://github.com/petershirley/raytracinginoneweekend
 #pragma once
 #include "vec3.h"
 
