@@ -3,7 +3,7 @@
 #include "fmt/format.h"
 
 #include "vec3.h"
-#include  "ray.h"
+#include "ray.h"
 #include "Drawer.h"
 
 #include <Windows.h>
@@ -18,14 +18,37 @@ const int height = 480;
 const int framesToRender = 1;
 const string windowTitle = "Lazy-Ray";
 
-inline void doColorThing(Color& color, int const& x, int const& y)
+const vec3 lower_left_corner(-4, -2.4, -2.4);
+const vec3 horizontal(8.0, 0.0, 0.0);
+const vec3 vertical(0.0, 4.8, 0.0);
+const vec3 origin(0.0, 0.0, 0.0);
+
+inline bool hit_sphere(const vec3& center, float radius, const ray& r) {
+	vec3 oc = r.origin() - center;
+	float a = dot(r.direction(), r.direction());
+	float b = 2.0 * dot(oc, r.direction());
+	float c = dot(oc, oc) - radius * radius;
+	float discriminant = b * b - 4 * a * c;
+	return (discriminant > 0);
+}
+
+inline vec3 ray_color(const ray& r) {
+	if (hit_sphere(vec3(0, 0, -1), 0.5, r))
+		return vec3(1, 0, 0);
+	vec3 unit_direction = unit_vector(r.direction());
+	float t = 0.5 * (unit_direction.y() + 1.0);
+	return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+}
+
+inline void calculatePixel(Color& color, int const& x, int const& y)
 {
-	vec3 flColor(float(x) / float(width), float(y) / float(height), 0.2f);
-				
-	color.r = static_cast<Uint8>(flColor[0] * 255.99f);
-	color.g = static_cast<Uint8>(flColor[1] * 255.99f);
-	color.b = static_cast<Uint8>(flColor[2] * 255.99f);
-	color.a = 255;
+	float u = float(x) / float(width);
+	float v = float(y) / float(height);
+	ray r(origin, lower_left_corner + u * horizontal + v * vertical);
+	vec3 col = ray_color(r);
+	color.r = int(255.99 * col[0]);
+	color.g = int(255.99 * col[1]);
+	color.b = int(255.99 * col[2]);
 }
 
 //going to make more of a path tracer but w/e
@@ -69,7 +92,7 @@ int main(int argc, char ** argv)
 		{
 			for (int x = 0; x < width; x++)
 			{
-				doColorThing(color, x, y);
+				calculatePixel(color, x, y);
 
 				pixelBatch[pixelBatchCount] = color.color_int;
 				pixelBatchCount++;
